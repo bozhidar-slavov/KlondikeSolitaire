@@ -626,8 +626,8 @@ var models;
             return this._deck.pop();
         };
         Deck.prototype.insertCards = function (cards) {
-            (_a = this._deck).push.apply(_a, cards);
             var _a;
+            (_a = this._deck).push.apply(_a, cards);
         };
         Object.defineProperty(Deck.prototype, "cards", {
             get: function () {
@@ -732,6 +732,7 @@ var gameObjects;
             configurable: true
         });
         Pile.prototype.createPile = function (pileType) {
+            var _a;
             return (_a = {},
                 _a[PileType.Stock] = this.drawRefreshOnStockPile(),
                 _a[PileType.Waste] = this.drawRoundedRectangle(),
@@ -739,7 +740,6 @@ var gameObjects;
                 _a[PileType.Tableau] = this.drawRoundedRectangle(),
                 _a[PileType.Temp] = this.initTempPile(),
                 _a)[pileType];
-            var _a;
         };
         Pile.prototype.addCard = function (inputCards) {
             for (var i = 0; i < inputCards.length; i++) {
@@ -1098,7 +1098,7 @@ var controllers;
                 this._tableauPiles[tableauPileIndex].addCard(this._tempPile.cards);
                 this._currentOperation.droppedPile = this._tableauPiles[tableauPileIndex];
             }
-            else {
+            else { // return card/cards to pile
                 this._targetPile.addCard(this._tempPile.cards);
                 this._currentOperation = undefined;
             }

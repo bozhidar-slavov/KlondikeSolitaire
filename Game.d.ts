@@ -22,8 +22,8 @@ declare namespace Pluck {
         register(controller: ViewController): void;
         unregister(controller: ViewController): void;
         notify(notification: Notification): void;
-        private registerRecipient(notificationName, controller);
-        private getRecipients(notificationName);
+        private registerRecipient;
+        private getRecipients;
     }
 }
 declare namespace Pluck {
@@ -111,7 +111,7 @@ declare namespace enums {
         Club = 0,
         Diamond = 1,
         Heart = 2,
-        Spade = 3,
+        Spade = 3
     }
 }
 declare namespace enums {
@@ -128,7 +128,7 @@ declare namespace enums {
         Ten = 10,
         Jack = 11,
         Queen = 12,
-        King = 13,
+        King = 13
     }
 }
 declare namespace gameObjects {
@@ -147,7 +147,7 @@ declare namespace gameObjects {
         constructor(type?: CardType, suit?: CardSuit);
         readonly type: CardType;
         readonly suit: CardSuit;
-        private createCard(type, suit);
+        private createCard;
     }
 }
 declare namespace models {
@@ -160,8 +160,8 @@ declare namespace models {
         drawCard(): Card;
         insertCards(cards: Card[]): void;
         readonly cards: Card[];
-        private initializeDeck();
-        private shuffleDeck();
+        private initializeDeck;
+        private shuffleDeck;
     }
 }
 declare namespace models {
@@ -176,7 +176,7 @@ declare namespace enums {
         Waste = 1,
         Foundation = 2,
         Tableau = 3,
-        Temp = 4,
+        Temp = 4
     }
 }
 declare namespace gameObjects {
@@ -200,8 +200,8 @@ declare namespace gameObjects {
         initTempPile(): PIXI.Graphics;
         drawSingleFoundationPile(): PIXI.Graphics;
         drawRefreshOnStockPile(): PIXI.Graphics;
-        private drawRoundedRectangle();
-        private setSpriteCenter(sprite);
+        private drawRoundedRectangle;
+        private setSpriteCenter;
     }
 }
 declare namespace models {
@@ -290,8 +290,8 @@ declare namespace views {
         constructor(buttonText: string, upTexture: PIXI.Texture, downTexture: PIXI.Texture);
         up(): void;
         down(): void;
-        private compose();
-        private setTextAtButtonCenter(text);
+        private compose;
+        private setTextAtButtonCenter;
     }
 }
 declare namespace views {
@@ -320,9 +320,9 @@ declare namespace solitaire {
     class Main extends PIXI.Container {
         constructor();
         start(): void;
-        private startLoadingAssets();
-        private onAssetsLoaded();
-        private createRenderer();
-        private animate();
+        private startLoadingAssets;
+        private onAssetsLoaded;
+        private createRenderer;
+        private animate;
     }
 }
