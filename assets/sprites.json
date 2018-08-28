@@ -1,0 +1,85 @@
+{
+"frames": {
+	"aceImage.png": {
+		"frame": {"x":120, "y":1469, "w":56, "h":63},
+		"spriteSourceSize": {"x":1,"y":0,"w":57,"h":65},
+		"sourceSize": {"w":57,"h":65}
+	},
+	"background.png": {
+		"frame": {"x":0, "y":0, "w":1920, "h":1200},
+		"spriteSourceSize": {"x":0,"y":0,"w":1920,"h":1200},
+		"sourceSize": {"w":1920,"h":1200}
+	},
+	"buttonDown.png": {
+		"frame": {"x":0, "y":1201, "w":250, "h":64},
+		"spriteSourceSize": {"x":3,"y":11,"w":256,"h":84},
+		"sourceSize": {"w":256,"h":84}
+	},
+	"buttonUp.png": {
+		"frame": {"x":0, "y":1266, "w":250, "h":64},
+		"spriteSourceSize": {"x":3,"y":8,"w":256,"h":81},
+		"sourceSize": {"w":256,"h":81}
+	},
+	"cardBackRed.png": {
+		"frame": {"x":0, "y":1331, "w":119, "h":164},
+		"spriteSourceSize": {"x":0,"y":0,"w":119,"h":165},
+		"sourceSize": {"w":119,"h":165}
+	},
+	"cardClean.png": {
+		"frame": {"x":0, "y":1496, "w":119, "h":165},
+		"spriteSourceSize": {"x":0,"y":0,"w":119,"h":165},
+		"sourceSize": {"w":119,"h":165}
+	},
+	"clubs.png": {
+		"frame": {"x":0, "y":1770, "w":88, "h":105},
+		"spriteSourceSize": {"x":9,"y":41,"w":119,"h":165},
+		"sourceSize": {"w":119,"h":165}
+	},
+	"diamonds.png": {
+		"frame": {"x":0, "y":1662, "w":88, "h":107},
+		"spriteSourceSize": {"x":8,"y":41,"w":119,"h":165},
+		"sourceSize": {"w":119,"h":165}
+	},
+	"hearts.png": {
+		"frame": {"x":89, "y":1662, "w":87, "h":102},
+		"spriteSourceSize": {"x":9,"y":44,"w":119,"h":165},
+		"sourceSize": {"w":119,"h":165}
+	},
+	"jackImage.png": {
+		"frame": {"x":120, "y":1592, "w":54, "h":59},
+		"spriteSourceSize": {"x":3,"y":0,"w":57,"h":65},
+		"sourceSize": {"w":57,"h":65}
+	},
+	"kingImage.png": {
+		"frame": {"x":120, "y":1533, "w":55, "h":58},
+		"spriteSourceSize": {"x":2,"y":1,"w":57,"h":65},
+		"sourceSize": {"w":57,"h":65}
+	},
+	"queenImage.png": {
+		"frame": {"x":175, "y":1592, "w":54, "h":59},
+		"spriteSourceSize": {"x":2,"y":1,"w":57,"h":65},
+		"sourceSize": {"w":57,"h":65}
+	},
+	"refresh.png": {
+		"frame": {"x":120, "y":1402, "w":65, "h":66},
+		"spriteSourceSize": {"x":3,"y":2,"w":70,"h":70},
+		"sourceSize": {"w":70,"h":70}
+	},
+	"spades.png": {
+		"frame": {"x":89, "y":1765, "w":85, "h":107},
+		"spriteSourceSize": {"x":9,"y":39,"w":119,"h":165},
+		"sourceSize": {"w":119,"h":165}
+	},
+	"suits.png": {
+		"frame": {"x":120, "y":1331, "w":70, "h":70},
+		"spriteSourceSize": {"x":0,"y":0,"w":70,"h":70},
+		"sourceSize": {"w":70,"h":70}
+	}
+
+},
+"meta": {
+	"image": "sprites.png",
+	"size": {"w": 1921, "h": 1876},
+	"scale": "1"
+}
+}

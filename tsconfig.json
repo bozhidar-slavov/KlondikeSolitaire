@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": true,
+    "declaration": true,
+    "outFile": "./Game.js",
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noImplicitThis": false,
+    "alwaysStrict": false,
+    "noImplicitReturns": false,
+    "allowUnreachableCode": true,
+    "experimentalDecorators": true
+  },
+  "include": [
+    "./typings/*.ts",
+    "./core/*.ts",
+    "./utils/*.ts",
+    "./src/Main.ts"
+  ]
+}
