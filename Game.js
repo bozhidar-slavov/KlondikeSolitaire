@@ -626,8 +626,8 @@ var models;
             return this._deck.pop();
         };
         Deck.prototype.insertCards = function (cards) {
-            var _a;
             (_a = this._deck).push.apply(_a, cards);
+            var _a;
         };
         Object.defineProperty(Deck.prototype, "cards", {
             get: function () {
@@ -732,7 +732,6 @@ var gameObjects;
             configurable: true
         });
         Pile.prototype.createPile = function (pileType) {
-            var _a;
             return (_a = {},
                 _a[PileType.Stock] = this.drawRefreshOnStockPile(),
                 _a[PileType.Waste] = this.drawRoundedRectangle(),
@@ -740,6 +739,7 @@ var gameObjects;
                 _a[PileType.Tableau] = this.drawRoundedRectangle(),
                 _a[PileType.Temp] = this.initTempPile(),
                 _a)[pileType];
+            var _a;
         };
         Pile.prototype.addCard = function (inputCards) {
             for (var i = 0; i < inputCards.length; i++) {
@@ -819,8 +819,16 @@ var models;
 })(models || (models = {}));
 /// <reference path="../../core/Model.ts" />
 /// <reference path="../models/Operation.ts" />
+/// <reference path="../gameObjects/Pile.ts" />
+/// <reference path="../gameObjects/Card.ts" />
+/// <reference path="../enums/PileType.ts" />
+/// <reference path="../enums/CardSuit.ts" />
+/// <reference path="../enums/CardType.ts" />
 var models;
 (function (models) {
+    var PileType = enums.PileType;
+    var CardSuit = enums.CardSuit;
+    var CardType = enums.CardType;
     var PilesModel = /** @class */ (function (_super) {
         __extends(PilesModel, _super);
         function PilesModel() {
@@ -828,10 +836,190 @@ var models;
             _this.operations = [];
             return _this;
         }
+        PilesModel.prototype.canDragCards = function (targetPile, targetCard, piles) {
+            var targetPileIndex = this.checkPilesForCollision(piles, targetCard);
+            var targetCardIndex = targetPile.cards.indexOf(targetCard);
+            var canDrag = false;
+            if (targetPile.getPileType === PileType.Waste || targetPile.getPileType === PileType.Foundation) {
+                return true;
+            }
+            if (targetPile.getPileType === PileType.Tableau && (targetPile.cards.length - 1 === targetCardIndex)) {
+                return true;
+            }
+            var currentPile = piles[targetPileIndex];
+            var currentPileLength = currentPile.cards.length;
+            for (var i = targetCardIndex; i < currentPileLength - 1; i++) {
+                var currentCard = currentPile.cards[i];
+                var nextCard = currentPile.cards[i + 1];
+                if (currentCard.type - 1 === nextCard.type && this.checkIfCardSuitIsOpposite(currentCard.suit, nextCard)) {
+                    canDrag = true;
+                }
+                else {
+                    return false;
+                }
+            }
+            return canDrag;
+        };
+        PilesModel.prototype.canAddCardToFoundationPile = function (card, pile) {
+            var canAdd;
+            var currentPileSuit;
+            var bottomPileCard;
+            var getPileCardOnTop;
+            var canAddNextCard;
+            if (pile.cards.length === 0 && card.type === CardType.Ace) {
+                canAdd = true;
+            }
+            if (pile.cards.length > 0) {
+                bottomPileCard = pile.cards[0];
+                currentPileSuit = bottomPileCard.suit;
+                getPileCardOnTop = pile.cards[pile.cards.length - 1].type;
+                canAddNextCard = card.type - 1 === getPileCardOnTop ? true : false;
+                currentPileSuit === card.suit && canAddNextCard ? canAdd = true : canAdd = false;
+            }
+            return canAdd;
+        };
+        PilesModel.prototype.canAddCardToTableauPile = function (card, pile) {
+            var canAdd;
+            var lastCardOfPile;
+            var lastCardOfPileSuit;
+            var lastCardOfPileType;
+            if (pile.cards.length === 0 && card.type !== CardType.King) {
+                return false;
+            }
+            if (pile.cards.length === 0 && card.type === CardType.King) {
+                return true;
+            }
+            lastCardOfPile = pile.cards[pile.cards.length - 1];
+            lastCardOfPileSuit = lastCardOfPile.suit;
+            lastCardOfPileType = lastCardOfPile.type;
+            if (lastCardOfPileType - 1 === card.type) {
+                canAdd = true;
+            }
+            else {
+                return canAdd;
+            }
+            canAdd = this.checkIfCardSuitIsOpposite(lastCardOfPileSuit, card);
+            return canAdd;
+        };
+        PilesModel.prototype.checkIfCardSuitIsOpposite = function (suit, card) {
+            var isOpposite = false;
+            switch (suit) {
+                case CardSuit.Club:
+                    isOpposite = card.suit === CardSuit.Diamond || card.suit === CardSuit.Heart ? true : false;
+                    break;
+                case CardSuit.Diamond:
+                    isOpposite = card.suit === CardSuit.Club || card.suit === CardSuit.Spade ? true : false;
+                    break;
+                case CardSuit.Heart:
+                    isOpposite = card.suit === CardSuit.Club || card.suit === CardSuit.Spade ? true : false;
+                    break;
+                case CardSuit.Spade:
+                    isOpposite = card.suit === CardSuit.Diamond || card.suit === CardSuit.Heart ? true : false;
+            }
+            return isOpposite;
+        };
+        PilesModel.prototype.checkPilesForCollision = function (targetPiles, targetCard) {
+            var pileIndex;
+            for (var i = 0; i < targetPiles.length; i++) {
+                var currentPile = targetPiles[i];
+                if (this.checkForCollision(targetCard, currentPile)) {
+                    pileIndex = i;
+                    break;
+                }
+            }
+            return pileIndex;
+        };
+        PilesModel.prototype.checkForCollision = function (card, pile) {
+            var cardBounds = card.getBounds();
+            var pileBounds = pile.getBounds();
+            return cardBounds.x + cardBounds.width > pileBounds.x &&
+                cardBounds.x < pileBounds.x + pileBounds.width &&
+                cardBounds.y + cardBounds.height > pileBounds.y &&
+                cardBounds.y < pileBounds.y + pileBounds.height;
+        };
         return PilesModel;
     }(Pluck.Model));
     models.PilesModel = PilesModel;
 })(models || (models = {}));
+/// <reference path="../../typings/pixi.js.d.ts" />
+/// <reference path="../gameObjects/Card.ts" />
+/// <reference path="../gameObjects/Pile.ts" />
+/// <reference path="../enums/PileType.ts" />
+var views;
+(function (views) {
+    var Pile = gameObjects.Pile;
+    var Card = gameObjects.Card;
+    var PileType = enums.PileType;
+    var PilesView = /** @class */ (function (_super) {
+        __extends(PilesView, _super);
+        function PilesView() {
+            var _this = _super.call(this) || this;
+            _this.stockCard = new Card();
+            _this.createStockPile();
+            _this.createWastePile();
+            _this.createFoundationPiles();
+            _this.createTableauPiles();
+            _this.addChild(_this.stockPile);
+            _this.addChild(_this.wastePile);
+            _this.foundationPiles.forEach(function (pile) { return _this.addChild(pile); });
+            _this.tableauPiles.forEach(function (pile) { return _this.addChild(pile); });
+            return _this;
+        }
+        PilesView.prototype.createStockPile = function () {
+            this.stockPile = new Pile(PileType.Stock);
+            this.stockPile.x = PilesView.Stock_Pile_X;
+            this.stockPile.y = PilesView.Stock_Pile_Y;
+            this.stockPile.buttonMode = true;
+            this.stockPile.interactive = true;
+        };
+        PilesView.prototype.createWastePile = function () {
+            this.wastePile = new Pile(PileType.Waste);
+            this.wastePile.x = PilesView.Waste_Pile_X;
+            this.wastePile.y = PilesView.Waste_Pile_Y;
+        };
+        PilesView.prototype.createFoundationPiles = function () {
+            this.foundationPiles = [];
+            var startX = PilesView.Foundation_Pile_Start_X;
+            for (var i = 0; i < PilesView.Foundation_Piles_Count; i++) {
+                var foundationPile = new Pile(PileType.Foundation);
+                foundationPile.x = startX;
+                foundationPile.y = PilesView.Foundation_Pile_Start_Y;
+                this.foundationPiles.push(foundationPile);
+                startX += this.stockCard.width + (PilesView.Line_Width * 2) + PilesView.Distance_Between_Piles + 5;
+            }
+        };
+        PilesView.prototype.createTableauPiles = function () {
+            this.tableauPiles = [];
+            var startX = PilesView.Tableau_Pile_Start_X;
+            for (var i = 0; i < PilesView.Tableau_Piles_Count; i++) {
+                var tableauPile = new Pile(PileType.Tableau, true);
+                tableauPile.x = startX;
+                tableauPile.y = PilesView.Tableau_Pile_Start_Y;
+                this.tableauPiles.push(tableauPile);
+                startX += this.stockCard.width + (PilesView.Line_Width * 2) + PilesView.Distance_Between_Piles;
+            }
+        };
+        // Stock Pile
+        PilesView.Stock_Pile_X = 20;
+        PilesView.Stock_Pile_Y = 20;
+        // Waste Pile
+        PilesView.Waste_Pile_X = 150;
+        PilesView.Waste_Pile_Y = 20;
+        // Foundation Pile
+        PilesView.Foundation_Piles_Count = 4;
+        PilesView.Foundation_Pile_Start_X = 585;
+        PilesView.Foundation_Pile_Start_Y = 20;
+        // Tableau Pile
+        PilesView.Tableau_Piles_Count = 7;
+        PilesView.Tableau_Pile_Start_X = 150;
+        PilesView.Tableau_Pile_Start_Y = 200;
+        // For calculating distance between piles
+        PilesView.Distance_Between_Piles = 20;
+        PilesView.Line_Width = 4;
+        return PilesView;
+    }(PIXI.Container));
+    views.PilesView = PilesView;
+})(views || (views = {}));
 /// <reference path="../models/Deck.ts"/>
 /// <reference path="../models/Notifications.ts"/>
 /// <reference path="../gameObjects/Pile.ts" />
@@ -842,28 +1030,25 @@ var models;
 /// <reference path="../models/Deck.ts" />
 /// <reference path="../models/Operation.ts" />
 /// <reference path="../models/PilesModel.ts" />
+/// <reference path="../views/PilesView.ts" />
 var controllers;
 (function (controllers) {
     var ViewController = Pluck.ViewController;
     var Notifications = models.Notifications;
     var Deck = models.Deck;
     var Pile = gameObjects.Pile;
-    var Card = gameObjects.Card;
     var PileType = enums.PileType;
-    var CardType = enums.CardType;
-    var CardSuit = enums.CardSuit;
     var Operation = models.Operation;
     var PilesModel = models.PilesModel;
+    var PilesView = views.PilesView;
     var PilesController = /** @class */ (function (_super) {
         __extends(PilesController, _super);
         function PilesController() {
             var _this = _super.call(this, new PIXI.Container()) || this;
             _this._pilesModel = new PilesModel();
-            _this._stockCard = new Card();
-            _this.createStockPile();
-            _this.createWastePile();
-            _this.createFoundationPiles();
-            _this.createTableauPiles();
+            _this._view = new PilesView();
+            _this._viewCast = _this._view;
+            // deal cards
             _this.addCardsInTableauPile();
             _this.addCardsInStockPile();
             _this.setupEventListeners(true);
@@ -886,50 +1071,12 @@ var controllers;
                     break;
             }
         };
-        PilesController.prototype.createStockPile = function () {
-            this._stockPile = new Pile(PileType.Stock);
-            this._stockPile.x = PilesController.Stock_Pile_X;
-            this._stockPile.y = PilesController.Stock_Pile_Y;
-            this.view.addChild(this._stockPile);
-            this._stockPile.buttonMode = true;
-            this._stockPile.interactive = true;
-        };
-        PilesController.prototype.createWastePile = function () {
-            this._wastePile = new Pile(PileType.Waste);
-            this._wastePile.x = PilesController.Waste_Pile_X;
-            this._wastePile.y = PilesController.Waste_Pile_Y;
-            this.view.addChild(this._wastePile);
-        };
-        PilesController.prototype.createFoundationPiles = function () {
-            this._foundationPiles = [];
-            var startX = PilesController.Foundation_Pile_Start_X;
-            for (var i = 0; i < PilesController.Foundation_Piles_Count; i++) {
-                var foundationPile = new Pile(PileType.Foundation);
-                foundationPile.x = startX;
-                foundationPile.y = PilesController.Foundation_Pile_Start_Y;
-                this._foundationPiles.push(foundationPile);
-                this.view.addChild(foundationPile);
-                startX += this._stockCard.width + (PilesController.Line_Width * 2) + PilesController.Distance_Between_Piles + 5;
-            }
-        };
-        PilesController.prototype.createTableauPiles = function () {
-            this._tableauPiles = [];
-            var startX = PilesController.Tableau_Pile_Start_X;
-            for (var i = 0; i < PilesController.Tableau_Piles_Count; i++) {
-                var tableauPile = new Pile(PileType.Tableau, true);
-                tableauPile.x = startX;
-                tableauPile.y = PilesController.Tableau_Pile_Start_Y;
-                this._tableauPiles.push(tableauPile);
-                this.view.addChild(tableauPile);
-                startX += this._stockCard.width + (PilesController.Line_Width * 2) + PilesController.Distance_Between_Piles;
-            }
-        };
         PilesController.prototype.addCardsInTableauPile = function () {
             for (var i = 0; i < PilesController.Tableau_Piles_Count; i++) {
                 for (var j = 0; j <= i; j++) {
                     var card = this.mainModel.drawCardFromDeck();
                     this.attachDragAndDrop(card);
-                    this._tableauPiles[i].addCard([card]);
+                    this._viewCast.tableauPiles[i].addCard([card]);
                 }
             }
         };
@@ -937,16 +1084,16 @@ var controllers;
             while (this.mainModel.deck.cards.length !== 0) {
                 var card = this.mainModel.drawCardFromDeck();
                 card.addChild(card.cardBackImage);
-                this._stockPile.addCard([card]);
+                this._viewCast.stockPile.addCard([card]);
             }
         };
         PilesController.prototype.createNewGame = function () {
             // clear piles
-            this._tableauPiles.forEach(function (pile) { return pile.removeAllCards(); });
-            this._foundationPiles.forEach(function (pile) { return pile.removeAllCards(); });
-            this._wastePile.removeAllCards();
-            this._stockPile.removeAllCards();
-            // reset undo operations
+            this._viewCast.tableauPiles.forEach(function (pile) { return pile.removeAllCards(); });
+            this._viewCast.foundationPiles.forEach(function (pile) { return pile.removeAllCards(); });
+            this._viewCast.wastePile.removeAllCards();
+            this._viewCast.stockPile.removeAllCards();
+            // clear undo operations
             this._pilesModel.operations = [];
             // create new deck
             this.mainModel.deck = new Deck();
@@ -973,9 +1120,9 @@ var controllers;
             this._pilesModel.operations.pop();
         };
         PilesController.prototype.onStockPileClick = function () {
-            if (this._stockPile.cards.length === 0) {
+            if (this._viewCast.stockPile.cards.length === 0) {
                 // reverse cards in pile to move them back in the same order
-                this._wastePile.cards.reverse();
+                this._viewCast.wastePile.cards.reverse();
                 // clear unnecessary undo operations between stock and waste piles
                 var counter = 0;
                 var operationsLength = this._pilesModel.operations.length;
@@ -993,27 +1140,27 @@ var controllers;
                         break;
                     }
                 }
-                for (var i = 0; i < this._wastePile.cards.length; i++) {
-                    var currentCard = this._wastePile.cards[i];
+                for (var i = 0; i < this._viewCast.wastePile.cards.length; i++) {
+                    var currentCard = this._viewCast.wastePile.cards[i];
                     // remove drag and drop listeners to avoid conflict with click event.
                     this.removeDragAndDrop(currentCard);
-                    this._stockPile.addCard([currentCard]);
+                    this._viewCast.stockPile.addCard([currentCard]);
                     // add card back red to clean card
                     currentCard.addChild(currentCard.cardBackImage);
                 }
-                this._wastePile.removeAllCards();
+                this._viewCast.wastePile.removeAllCards();
             }
             else {
                 // for undo operation
-                var currentCard = this._stockPile.cards[this._stockPile.cards.length - 1];
-                this._currentOperation = new Operation([currentCard], this._stockPile);
-                this._currentOperation.droppedPile = this._wastePile;
+                var currentCard = this._viewCast.stockPile.cards[this._viewCast.stockPile.cards.length - 1];
+                this._currentOperation = new Operation([currentCard], this._viewCast.stockPile);
+                this._currentOperation.droppedPile = this._viewCast.wastePile;
                 this._pilesModel.operations.push(this._currentOperation);
-                this._wastePile.addCard([currentCard]);
+                this._viewCast.wastePile.addCard([currentCard]);
                 // remove card back image
                 currentCard.removeChild(currentCard.cardBackImage);
                 this.attachDragAndDrop(currentCard);
-                this._stockPile.removeCard(currentCard);
+                this._viewCast.stockPile.removeCard(currentCard);
             }
         };
         PilesController.prototype.setupKeyboardEvents = function () {
@@ -1029,12 +1176,10 @@ var controllers;
         };
         PilesController.prototype.setupEventListeners = function (attach) {
             if (attach) {
-                // add event
-                this._stockPile.on("click", this.onStockPileClick.bind(this));
+                this._viewCast.stockPile.on("click", this.onStockPileClick.bind(this));
             }
             else {
-                // remove event
-                this._stockPile.off("click", this.onStockPileClick.bind(this));
+                this._viewCast.stockPile.off("click", this.onStockPileClick.bind(this));
             }
         };
         PilesController.prototype.attachDragAndDrop = function (target) {
@@ -1055,7 +1200,7 @@ var controllers;
             this._targetCard.data = e.data;
             var cardPile = this._targetCard.parent;
             this._targetPile = cardPile;
-            var canDrag = this.canDragCards();
+            var canDrag = this._pilesModel.canDragCards(this._targetPile, this._targetCard, this._viewCast.tableauPiles);
             if (canDrag) {
                 var targetCardIndex = this._targetPile.cards.indexOf(this._targetCard);
                 this._tempPile = new Pile(PileType.Temp, true);
@@ -1066,6 +1211,7 @@ var controllers;
                 }
                 this._currentOperation = new Operation(this._tempPile.cards, this._targetPile);
                 this.view.addChild(this._tempPile);
+                // when mousedown on card is fired to keep cursor position at the center
                 this._dragDifference = e.data.getLocalPosition(this._targetCard);
                 this._tempPile.position.set(e.data.global.x - this._dragDifference.x, e.data.global.y - this._dragDifference.y);
                 this._isDragging = true;
@@ -1087,18 +1233,18 @@ var controllers;
                 return;
             }
             this._isDragging = false;
-            var foundationPileIndex = this.checkPilesForCollision(this._foundationPiles);
-            var tableauPileIndex = this.checkPilesForCollision(this._tableauPiles);
+            var foundationPileIndex = this._pilesModel.checkPilesForCollision(this._viewCast.foundationPiles, this._targetCard);
+            var tableauPileIndex = this._pilesModel.checkPilesForCollision(this._viewCast.tableauPiles, this._targetCard);
             // if card/cards should be placed somewhere
-            if (foundationPileIndex !== undefined && this.canAddCardToFoundationPile(this._tempPile.cards[0], this._foundationPiles[foundationPileIndex])) {
-                this._foundationPiles[foundationPileIndex].addCard(this._tempPile.cards);
-                this._currentOperation.droppedPile = this._foundationPiles[foundationPileIndex];
+            if (foundationPileIndex !== undefined && this._pilesModel.canAddCardToFoundationPile(this._tempPile.cards[0], this._viewCast.foundationPiles[foundationPileIndex])) {
+                this._viewCast.foundationPiles[foundationPileIndex].addCard(this._tempPile.cards);
+                this._currentOperation.droppedPile = this._viewCast.foundationPiles[foundationPileIndex];
             }
-            else if (tableauPileIndex !== undefined && this.canAddCardToTableauPile(this._tempPile.cards[0], this._tableauPiles[tableauPileIndex])) {
-                this._tableauPiles[tableauPileIndex].addCard(this._tempPile.cards);
-                this._currentOperation.droppedPile = this._tableauPiles[tableauPileIndex];
+            else if (tableauPileIndex !== undefined && this._pilesModel.canAddCardToTableauPile(this._tempPile.cards[0], this._viewCast.tableauPiles[tableauPileIndex])) {
+                this._viewCast.tableauPiles[tableauPileIndex].addCard(this._tempPile.cards);
+                this._currentOperation.droppedPile = this._viewCast.tableauPiles[tableauPileIndex];
             }
-            else { // return card/cards to pile
+            else {
                 this._targetPile.addCard(this._tempPile.cards);
                 this._currentOperation = undefined;
             }
@@ -1109,107 +1255,6 @@ var controllers;
             this._targetPile = null;
             this._targetCard = null;
             this._tempPile = null;
-        };
-        PilesController.prototype.canAddCardToFoundationPile = function (card, pile) {
-            var canAdd;
-            var currentPileSuit;
-            var bottomPileCard;
-            var getPileCardOnTop;
-            var canAddNextCard;
-            if (pile.cards.length === 0 && card.type === CardType.Ace) {
-                canAdd = true;
-            }
-            if (pile.cards.length > 0) {
-                bottomPileCard = pile.cards[0];
-                currentPileSuit = bottomPileCard.suit;
-                getPileCardOnTop = pile.cards[pile.cards.length - 1].type;
-                canAddNextCard = card.type - 1 === getPileCardOnTop ? true : false;
-                currentPileSuit === card.suit && canAddNextCard ? canAdd = true : canAdd = false;
-            }
-            return canAdd;
-        };
-        PilesController.prototype.canAddCardToTableauPile = function (card, pile) {
-            var canAdd;
-            var lastCardOfPile;
-            var lastCardOfPileSuit;
-            var lastCardOfPileType;
-            if (pile.cards.length === 0 && card.type !== CardType.King) {
-                return canAdd = false;
-            }
-            if (pile.cards.length === 0 && card.type === CardType.King) {
-                return canAdd = true;
-            }
-            lastCardOfPile = pile.cards[pile.cards.length - 1];
-            lastCardOfPileSuit = lastCardOfPile.suit;
-            lastCardOfPileType = lastCardOfPile.type;
-            if (lastCardOfPileType - 1 === card.type) {
-                canAdd = true;
-            }
-            else {
-                return canAdd;
-            }
-            canAdd = this.checkIfCardSuitIsOpposite(lastCardOfPileSuit, card);
-            return canAdd;
-        };
-        PilesController.prototype.canDragCards = function () {
-            var targetPileIndex = this.checkPilesForCollision(this._tableauPiles);
-            var targetCardIndex = this._targetPile.cards.indexOf(this._targetCard);
-            var canDrag = false;
-            if (this._targetPile.getPileType === PileType.Waste || this._targetPile.getPileType === PileType.Foundation) {
-                return true;
-            }
-            if (this._targetPile.getPileType === PileType.Tableau && (this._targetPile.cards.length - 1 === targetCardIndex)) {
-                return true;
-            }
-            var currentPile = this._tableauPiles[targetPileIndex];
-            var currentPileLength = currentPile.cards.length;
-            for (var i = targetCardIndex; i < currentPileLength - 1; i++) {
-                var currentCard = currentPile.cards[i];
-                var nextCard = currentPile.cards[i + 1];
-                if (currentCard.type - 1 === nextCard.type && this.checkIfCardSuitIsOpposite(currentCard.suit, nextCard)) {
-                    canDrag = true;
-                }
-                else {
-                    return false;
-                }
-            }
-            return canDrag;
-        };
-        PilesController.prototype.checkIfCardSuitIsOpposite = function (suit, card) {
-            var isOpposite = false;
-            switch (suit) {
-                case CardSuit.Club:
-                    isOpposite = card.suit === CardSuit.Diamond || card.suit === CardSuit.Heart ? true : false;
-                    break;
-                case CardSuit.Diamond:
-                    isOpposite = card.suit === CardSuit.Club || card.suit === CardSuit.Spade ? true : false;
-                    break;
-                case CardSuit.Heart:
-                    isOpposite = card.suit === CardSuit.Club || card.suit === CardSuit.Spade ? true : false;
-                    break;
-                case CardSuit.Spade:
-                    isOpposite = card.suit === CardSuit.Diamond || card.suit === CardSuit.Heart ? true : false;
-            }
-            return isOpposite;
-        };
-        PilesController.prototype.checkPilesForCollision = function (targetPiles) {
-            var pileIndex;
-            for (var i = 0; i < targetPiles.length; i++) {
-                var currentPile = targetPiles[i];
-                if (this.checkForCollision(this._targetCard, currentPile)) {
-                    pileIndex = i;
-                    break;
-                }
-            }
-            return pileIndex;
-        };
-        PilesController.prototype.checkForCollision = function (card, pile) {
-            var cardBounds = card.getBounds();
-            var pileBounds = pile.getBounds();
-            return cardBounds.x + cardBounds.width > pileBounds.x &&
-                cardBounds.x < pileBounds.x + pileBounds.width &&
-                cardBounds.y + cardBounds.height > pileBounds.y &&
-                cardBounds.y < pileBounds.y + pileBounds.height;
         };
         Object.defineProperty(PilesController.prototype, "view", {
             get: function () {
@@ -1225,23 +1270,7 @@ var controllers;
             enumerable: true,
             configurable: true
         });
-        // Stock Pile
-        PilesController.Stock_Pile_X = 20;
-        PilesController.Stock_Pile_Y = 20;
-        // Waste Pile
-        PilesController.Waste_Pile_X = 150;
-        PilesController.Waste_Pile_Y = 20;
-        // Foundation Pile
-        PilesController.Foundation_Piles_Count = 4;
-        PilesController.Foundation_Pile_Start_X = 585;
-        PilesController.Foundation_Pile_Start_Y = 20;
-        // Tableau Pile
         PilesController.Tableau_Piles_Count = 7;
-        PilesController.Tableau_Pile_Start_X = 150;
-        PilesController.Tableau_Pile_Start_Y = 200;
-        // For calculating distance between piles
-        PilesController.Distance_Between_Piles = 20;
-        PilesController.Line_Width = 4;
         return PilesController;
     }(ViewController));
     controllers.PilesController = PilesController;
@@ -1272,10 +1301,10 @@ var views;
             });
             // on hover
             _this.on("mouseover", function () {
-                _this.alpha = 0.7;
+                _this.alpha = 1;
             });
             _this.on("mouseout", function () {
-                _this.alpha = 1;
+                _this.alpha = 0.8;
             });
             _this.interactive = true;
             _this.buttonMode = true;
@@ -1318,24 +1347,34 @@ var views;
         __extends(UIView, _super);
         function UIView() {
             var _this = _super.call(this) || this;
-            var textureUp = PIXI.Texture.fromImage("buttonUp.png");
-            var textureDown = PIXI.Texture.fromImage("buttonDown.png");
-            // create new game button and add to stage
-            _this.newGameButton = new SimpleButton("New Game", textureUp, textureDown);
+            _this.textureUp = PIXI.Texture.fromImage("buttonUp.png");
+            _this.textureDown = PIXI.Texture.fromImage("buttonDown.png");
+            _this.createNewGameButton();
+            _this.createUndoButton();
             _this.addChild(_this.newGameButton);
-            // set position to new game button
-            _this.newGameButton.x = 20;
-            _this.newGameButton.y = 630;
-            _this.newGameButton.width = 115;
-            // create undo button and add to stage
-            _this.undoButton = new SimpleButton("Undo (ctrl+z)", textureUp, textureDown);
             _this.addChild(_this.undoButton);
-            // set position to undo button
-            _this.undoButton.x = 20;
-            _this.undoButton.y = 550;
-            _this.undoButton.width = 115;
             return _this;
         }
+        UIView.prototype.createNewGameButton = function () {
+            this.newGameButton = new SimpleButton("New Game", this.textureUp, this.textureDown);
+            this.newGameButton.alpha = UIView.Buttons_Alpha;
+            this.newGameButton.x = UIView.New_Game_Button_X;
+            this.newGameButton.y = UIView.New_Game_Button_Y;
+            this.newGameButton.width = UIView.Buttons_Width;
+        };
+        UIView.prototype.createUndoButton = function () {
+            this.undoButton = new SimpleButton("Undo (ctrl+z)", this.textureUp, this.textureDown);
+            this.undoButton.alpha = UIView.Buttons_Alpha;
+            this.undoButton.x = UIView.Undo_Button_X;
+            this.undoButton.y = UIView.Undo_Button_Y;
+            this.undoButton.width = UIView.Buttons_Width;
+        };
+        UIView.Buttons_Width = 115;
+        UIView.Buttons_Alpha = 0.8;
+        UIView.New_Game_Button_X = 20;
+        UIView.New_Game_Button_Y = 630;
+        UIView.Undo_Button_X = 20;
+        UIView.Undo_Button_Y = 550;
         return UIView;
     }(PIXI.Container));
     views.UIView = UIView;
@@ -1397,9 +1436,9 @@ var controllers;
     }(ViewController));
     controllers.RootController = RootController;
 })(controllers || (controllers = {}));
-///<reference path="../typings/pixi.js.d.ts" />
+/// <reference path="../typings/pixi.js.d.ts" />
 /// <reference path="../typings/greensock.d.ts" />
-///<reference path="controllers/RootController.ts"/>
+/// <reference path="controllers/RootController.ts"/>
 var solitaire;
 (function (solitaire) {
     var RootController = controllers.RootController;

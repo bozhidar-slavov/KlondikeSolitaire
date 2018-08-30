@@ -7,6 +7,18 @@ namespace views {
 
     export class UIView extends PIXI.Container {
 
+        private static readonly Buttons_Width = 115;
+        private static readonly Buttons_Alpha = 0.8;
+
+        private static readonly New_Game_Button_X = 20;
+        private static readonly New_Game_Button_Y = 630;
+        
+        private static readonly Undo_Button_X = 20;
+        private static readonly Undo_Button_Y = 550;
+
+        textureUp: PIXI.Texture;
+        textureDown: PIXI.Texture;
+        
         newGameButton: SimpleButton;
         undoButton: SimpleButton;
 
@@ -14,26 +26,32 @@ namespace views {
 
             super();
             
-            const textureUp = PIXI.Texture.fromImage("buttonUp.png");
-            const textureDown = PIXI.Texture.fromImage("buttonDown.png");
+            this.textureUp = PIXI.Texture.fromImage("buttonUp.png");
+            this.textureDown = PIXI.Texture.fromImage("buttonDown.png");
 
-            // create new game button and add to stage
-            this.newGameButton = new SimpleButton("New Game", textureUp, textureDown);
+            this.createNewGameButton();
+            this.createUndoButton();
+
             this.addChild(this.newGameButton);
-            
-            // set position to new game button
-            this.newGameButton.x = 20;
-            this.newGameButton.y = 630;
-            this.newGameButton.width = 115;
-
-            // create undo button and add to stage
-            this.undoButton = new SimpleButton("Undo (ctrl+z)", textureUp, textureDown);
             this.addChild(this.undoButton);
+        }
 
-            // set position to undo button
-            this.undoButton.x = 20;
-            this.undoButton.y = 550;
-            this.undoButton.width = 115;
+        createNewGameButton(): void {
+            this.newGameButton = new SimpleButton("New Game", this.textureUp, this.textureDown);
+
+            this.newGameButton.alpha = UIView.Buttons_Alpha
+            this.newGameButton.x = UIView.New_Game_Button_X;
+            this.newGameButton.y = UIView.New_Game_Button_Y;
+            this.newGameButton.width = UIView.Buttons_Width;
+        }
+
+        createUndoButton(): void {
+            this.undoButton = new SimpleButton("Undo (ctrl+z)", this.textureUp, this.textureDown);
+
+            this.undoButton.alpha = UIView.Buttons_Alpha;
+            this.undoButton.x = UIView.Undo_Button_X;
+            this.undoButton.y = UIView.Undo_Button_Y;
+            this.undoButton.width = UIView.Buttons_Width;
         }
     }
 }

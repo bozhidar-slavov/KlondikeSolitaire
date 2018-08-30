@@ -1,12 +1,11 @@
-///<reference path="../typings/pixi.js.d.ts" />
+/// <reference path="../typings/pixi.js.d.ts" />
 /// <reference path="../typings/greensock.d.ts" />
 
-///<reference path="controllers/RootController.ts"/>
+/// <reference path="controllers/RootController.ts"/>
 
 namespace solitaire {
 
     import RootController = controllers.RootController;
-    
 
     export class Main extends PIXI.Container {
         constructor() {

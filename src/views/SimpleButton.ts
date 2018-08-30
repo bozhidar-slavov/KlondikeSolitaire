@@ -35,11 +35,11 @@ namespace views {
 
             // on hover
             this.on("mouseover", () => {
-                this.alpha = 0.7;
+                this.alpha = 1;
             });
 
             this.on("mouseout", () => {
-                this.alpha = 1;
+                this.alpha = 0.8;
             });
 
             this.interactive = true;

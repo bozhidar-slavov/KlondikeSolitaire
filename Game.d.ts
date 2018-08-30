@@ -22,8 +22,8 @@ declare namespace Pluck {
         register(controller: ViewController): void;
         unregister(controller: ViewController): void;
         notify(notification: Notification): void;
-        private registerRecipient;
-        private getRecipients;
+        private registerRecipient(notificationName, controller);
+        private getRecipients(notificationName);
     }
 }
 declare namespace Pluck {
@@ -111,7 +111,7 @@ declare namespace enums {
         Club = 0,
         Diamond = 1,
         Heart = 2,
-        Spade = 3
+        Spade = 3,
     }
 }
 declare namespace enums {
@@ -128,7 +128,7 @@ declare namespace enums {
         Ten = 10,
         Jack = 11,
         Queen = 12,
-        King = 13
+        King = 13,
     }
 }
 declare namespace gameObjects {
@@ -147,7 +147,7 @@ declare namespace gameObjects {
         constructor(type?: CardType, suit?: CardSuit);
         readonly type: CardType;
         readonly suit: CardSuit;
-        private createCard;
+        private createCard(type, suit);
     }
 }
 declare namespace models {
@@ -160,8 +160,8 @@ declare namespace models {
         drawCard(): Card;
         insertCards(cards: Card[]): void;
         readonly cards: Card[];
-        private initializeDeck;
-        private shuffleDeck;
+        private initializeDeck();
+        private shuffleDeck();
     }
 }
 declare namespace models {
@@ -176,7 +176,7 @@ declare namespace enums {
         Waste = 1,
         Foundation = 2,
         Tableau = 3,
-        Temp = 4
+        Temp = 4,
     }
 }
 declare namespace gameObjects {
@@ -200,8 +200,8 @@ declare namespace gameObjects {
         initTempPile(): PIXI.Graphics;
         drawSingleFoundationPile(): PIXI.Graphics;
         drawRefreshOnStockPile(): PIXI.Graphics;
-        private drawRoundedRectangle;
-        private setSpriteCenter;
+        private drawRoundedRectangle();
+        private setSpriteCenter(sprite);
     }
 }
 declare namespace models {
@@ -216,21 +216,26 @@ declare namespace models {
 }
 declare namespace models {
     import Operation = models.Operation;
+    import Card = gameObjects.Card;
+    import Pile = gameObjects.Pile;
+    import CardSuit = enums.CardSuit;
     class PilesModel extends Pluck.Model {
         operations: Operation[];
         constructor();
+        canDragCards(targetPile: Pile, targetCard: Card, piles: Pile[]): boolean;
+        canAddCardToFoundationPile(card: Card, pile: Pile): boolean;
+        canAddCardToTableauPile(card: Card, pile: Pile): boolean;
+        checkIfCardSuitIsOpposite(suit: CardSuit, card: Card): boolean;
+        checkPilesForCollision(targetPiles: Pile[], targetCard: Card): number;
+        checkForCollision(card: Card, pile: Pile): boolean;
     }
 }
-declare namespace controllers {
-    import ViewController = Pluck.ViewController;
-    import MainModel = models.MainModel;
+declare namespace views {
     import Pile = gameObjects.Pile;
     import Card = gameObjects.Card;
-    import CardSuit = enums.CardSuit;
-    class PilesController extends ViewController {
+    class PilesView extends PIXI.Container {
         private static readonly Stock_Pile_X;
         private static readonly Stock_Pile_Y;
-        т: any;
         private static readonly Waste_Pile_X;
         private static readonly Waste_Pile_Y;
         private static readonly Foundation_Piles_Count;
@@ -241,11 +246,24 @@ declare namespace controllers {
         private static readonly Tableau_Pile_Start_Y;
         private static readonly Distance_Between_Piles;
         private static readonly Line_Width;
-        private _stockPile;
-        private _wastePile;
-        private _foundationPiles;
-        private _tableauPiles;
-        private _stockCard;
+        stockPile: Pile;
+        wastePile: Pile;
+        foundationPiles: Pile[];
+        tableauPiles: Pile[];
+        stockCard: Card;
+        constructor();
+        createStockPile(): void;
+        createWastePile(): void;
+        createFoundationPiles(): void;
+        createTableauPiles(): void;
+    }
+}
+declare namespace controllers {
+    import ViewController = Pluck.ViewController;
+    import MainModel = models.MainModel;
+    import Card = gameObjects.Card;
+    class PilesController extends ViewController {
+        private static readonly Tableau_Piles_Count;
         private _targetCard;
         private _targetPile;
         private _tempPile;
@@ -253,13 +271,10 @@ declare namespace controllers {
         private _isDragging;
         private _currentOperation;
         private _pilesModel;
+        private _viewCast;
         constructor();
         getInterests(): string[];
         handleNotification(notification?: Pluck.Notification): void;
-        createStockPile(): void;
-        createWastePile(): void;
-        createFoundationPiles(): void;
-        createTableauPiles(): void;
         addCardsInTableauPile(): void;
         addCardsInStockPile(): void;
         createNewGame(): void;
@@ -272,12 +287,6 @@ declare namespace controllers {
         onMouseDown(e: PIXI.interaction.InteractionEvent): void;
         onMouseMove(e: PIXI.interaction.InteractionEvent): void;
         onMouseUp(): void;
-        canAddCardToFoundationPile(card: Card, pile: Pile): boolean;
-        canAddCardToTableauPile(card: Card, pile: Pile): boolean;
-        canDragCards(): boolean;
-        checkIfCardSuitIsOpposite(suit: CardSuit, card: Card): boolean;
-        checkPilesForCollision(targetPiles: Pile[]): number;
-        checkForCollision(card: Card, pile: Pile): boolean;
         protected readonly view: PIXI.Container;
         protected readonly mainModel: MainModel;
     }
@@ -290,16 +299,26 @@ declare namespace views {
         constructor(buttonText: string, upTexture: PIXI.Texture, downTexture: PIXI.Texture);
         up(): void;
         down(): void;
-        private compose;
-        private setTextAtButtonCenter;
+        private compose();
+        private setTextAtButtonCenter(text);
     }
 }
 declare namespace views {
     import SimpleButton = views.SimpleButton;
     class UIView extends PIXI.Container {
+        private static readonly Buttons_Width;
+        private static readonly Buttons_Alpha;
+        private static readonly New_Game_Button_X;
+        private static readonly New_Game_Button_Y;
+        private static readonly Undo_Button_X;
+        private static readonly Undo_Button_Y;
+        textureUp: PIXI.Texture;
+        textureDown: PIXI.Texture;
         newGameButton: SimpleButton;
         undoButton: SimpleButton;
         constructor();
+        createNewGameButton(): void;
+        createUndoButton(): void;
     }
 }
 declare namespace controllers {
@@ -320,9 +339,9 @@ declare namespace solitaire {
     class Main extends PIXI.Container {
         constructor();
         start(): void;
-        private startLoadingAssets;
-        private onAssetsLoaded;
-        private createRenderer;
-        private animate;
+        private startLoadingAssets();
+        private onAssetsLoaded();
+        private createRenderer();
+        private animate();
     }
 }
