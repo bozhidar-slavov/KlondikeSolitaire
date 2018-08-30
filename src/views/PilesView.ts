@@ -42,7 +42,6 @@ namespace views {
 
         stockCard: Card;
 
-
         constructor() {
 
             super();
