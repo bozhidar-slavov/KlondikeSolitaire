@@ -25,8 +25,6 @@ namespace controllers {
 
     export class PilesController extends ViewController {
 
-        private static readonly Tableau_Piles_Count = 7;
-
         // Drag and drop
         private _targetCard: Card;
         private _targetPile: Pile;
@@ -52,7 +50,7 @@ namespace controllers {
             this.addCardsInTableauPile();
             this.addCardsInStockPile();
 
-            this.setupEventListeners(true)
+            this.setupEventListeners(true);
             this.setupKeyboardEvents();
         }
 
@@ -75,13 +73,15 @@ namespace controllers {
         }
 
         addCardsInTableauPile(): void {
-            for (let i = 0; i < PilesController.Tableau_Piles_Count; i++) {
+            for (let i = 0; i < this._viewCast.tableauPiles.length; i++) {
                 for (let j = 0; j <= i; j++) {
                     const card = this.mainModel.drawCardFromDeck();
                     this.attachDragAndDrop(card);
                     this._viewCast.tableauPiles[i].addCard([card]);
                 }
             }
+            
+            this._viewCast.tableauPiles.forEach(pile => TweenMax.staggerFrom(pile.cards, 0.2, { x: -500, y: -500 }, 0.1));
         }
 
         addCardsInStockPile(): void {
@@ -90,6 +90,8 @@ namespace controllers {
                 card.addChild(card.cardBackImage);
                 this._viewCast.stockPile.addCard([card]);
             }
+
+            TweenMax.staggerFrom(this._viewCast.stockPile.cards, 0.2, { x: -150, y: -150, rotation: 0.5}, 0.1);
         }
 
         createNewGame(): void {
@@ -139,7 +141,7 @@ namespace controllers {
             if (this._viewCast.stockPile.cards.length === 0) {
                 // reverse cards in pile to move them back in the same order
                 this._viewCast.wastePile.cards.reverse();
-                
+
                 // clear unnecessary undo operations between stock and waste piles
                 let counter = 0;
                 let operationsLength = this._pilesModel.operations.length;
@@ -158,10 +160,10 @@ namespace controllers {
                         break;
                     }
                 }
-                
+
                 for (let i = 0; i < this._viewCast.wastePile.cards.length; i++) {
                     let currentCard = this._viewCast.wastePile.cards[i];
-                    
+
                     // remove drag and drop listeners to avoid conflict with click event.
                     this.removeDragAndDrop(currentCard);
 
@@ -178,7 +180,7 @@ namespace controllers {
                 this._currentOperation = new Operation([currentCard], this._viewCast.stockPile);
                 this._currentOperation.droppedPile = this._viewCast.wastePile;
                 this._pilesModel.operations.push(this._currentOperation);
-                
+
                 this._viewCast.wastePile.addCard([currentCard]);
 
                 // remove card back image
@@ -186,6 +188,7 @@ namespace controllers {
 
                 this.attachDragAndDrop(currentCard);
                 this._viewCast.stockPile.removeCard(currentCard);
+                TweenMax.from(currentCard, 0.2, { x: -150 });
             }
         }
 
@@ -193,7 +196,7 @@ namespace controllers {
             document.onkeydown = (e: KeyboardEvent) => {
                 if (e.keyCode === 90 && e.ctrlKey) {
                     this.executeUndo();
-                } else if(e.keyCode === 32) {
+                } else if (e.keyCode === 32) {
                     this.onStockPileClick();
                 }
             }
@@ -280,11 +283,12 @@ namespace controllers {
             // if card/cards should be placed somewhere
             if (foundationPileIndex !== undefined && this._pilesModel.canAddCardToFoundationPile(this._tempPile.cards[0], this._viewCast.foundationPiles[foundationPileIndex])) {
                 this._viewCast.foundationPiles[foundationPileIndex].addCard(this._tempPile.cards);
-                this._currentOperation.droppedPile = this._viewCast.foundationPiles[foundationPileIndex]
+                this._currentOperation.droppedPile = this._viewCast.foundationPiles[foundationPileIndex];
+
             } else if (tableauPileIndex !== undefined && this._pilesModel.canAddCardToTableauPile(this._tempPile.cards[0], this._viewCast.tableauPiles[tableauPileIndex])) {
                 this._viewCast.tableauPiles[tableauPileIndex].addCard(this._tempPile.cards);
-                this._currentOperation.droppedPile = this._viewCast.tableauPiles[tableauPileIndex]
-            } else { // return card/cards to pile
+                this._currentOperation.droppedPile = this._viewCast.tableauPiles[tableauPileIndex];
+            } else { // return card/cards to pile 
                 this._targetPile.addCard(this._tempPile.cards);
                 this._currentOperation = undefined;
             }

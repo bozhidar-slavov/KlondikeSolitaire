@@ -3,9 +3,11 @@
 /// <reference path="../enums/CardType.ts" />
 
 namespace gameObjects {
+    
     import PileType = enums.PileType;
 
     export class Pile extends PIXI.Container {
+
         private static Pile_Width: number;
         private static Pile_Height: number;
         private static readonly Rectangle_Radius = 20;
@@ -79,7 +81,7 @@ namespace gameObjects {
         initTempPile(): PIXI.Graphics {
             return new PIXI.Graphics();
         }
-        
+
         drawSingleFoundationPile(): PIXI.Graphics {
             let rectangle = this.drawRoundedRectangle();
 

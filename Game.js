@@ -1072,13 +1072,14 @@ var controllers;
             }
         };
         PilesController.prototype.addCardsInTableauPile = function () {
-            for (var i = 0; i < PilesController.Tableau_Piles_Count; i++) {
+            for (var i = 0; i < this._viewCast.tableauPiles.length; i++) {
                 for (var j = 0; j <= i; j++) {
                     var card = this.mainModel.drawCardFromDeck();
                     this.attachDragAndDrop(card);
                     this._viewCast.tableauPiles[i].addCard([card]);
                 }
             }
+            this._viewCast.tableauPiles.forEach(function (pile) { return TweenMax.staggerFrom(pile.cards, 0.2, { x: -500, y: -500 }, 0.1); });
         };
         PilesController.prototype.addCardsInStockPile = function () {
             while (this.mainModel.deck.cards.length !== 0) {
@@ -1086,6 +1087,7 @@ var controllers;
                 card.addChild(card.cardBackImage);
                 this._viewCast.stockPile.addCard([card]);
             }
+            TweenMax.staggerFrom(this._viewCast.stockPile.cards, 0.2, { x: -150, y: -150, rotation: 0.5 }, 0.1);
         };
         PilesController.prototype.createNewGame = function () {
             // clear piles
@@ -1161,6 +1163,7 @@ var controllers;
                 currentCard.removeChild(currentCard.cardBackImage);
                 this.attachDragAndDrop(currentCard);
                 this._viewCast.stockPile.removeCard(currentCard);
+                TweenMax.from(currentCard, 0.2, { x: -150 });
             }
         };
         PilesController.prototype.setupKeyboardEvents = function () {
@@ -1270,7 +1273,6 @@ var controllers;
             enumerable: true,
             configurable: true
         });
-        PilesController.Tableau_Piles_Count = 7;
         return PilesController;
     }(ViewController));
     controllers.PilesController = PilesController;

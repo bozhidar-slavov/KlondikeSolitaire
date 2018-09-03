@@ -3,6 +3,7 @@
 /// <reference path="../controllers/UIController.ts" />
 
 namespace controllers {
+    
     import ViewController = Pluck.ViewController;
     import MainModel = models.MainModel;
 

@@ -56,7 +56,7 @@ namespace gameObjects {
 
         private createCard(type: CardType, suit: CardSuit): PIXI.Sprite {
             if(!type && !suit) {
-                return new PIXI.Sprite(PIXI.Texture.fromImage("cardBackRed.png"));   
+                return new PIXI.Sprite(PIXI.Texture.fromImage("cardBackRed.png"));
             }
 
             this.cardClean = new PIXI.Sprite(PIXI.Texture.fromImage("cardClean.png"));

@@ -263,7 +263,6 @@ declare namespace controllers {
     import MainModel = models.MainModel;
     import Card = gameObjects.Card;
     class PilesController extends ViewController {
-        private static readonly Tableau_Piles_Count;
         private _targetCard;
         private _targetPile;
         private _tempPile;
